@@ -1,0 +1,87 @@
+\usepackage{amsmath}
+
+\newcommand{\cL}{{\cal L}}
+
+%\usepackage{biblatex}
+%\usepackage[style=ieee]{biblatex}
+%\AtEveryBibitem{%
+%  \clearfield{issn} % Remove issn
+%  \clearfield{doi} % Remove doi
+%
+%  \ifentrytype{online}{}{% Remove url except for @online
+%    \clearfield{url}
+%  }
+%}
+
+%\usepackage{pifont}
+%\usepackage[T1]{fontenc} % this is just to get the natural encoding for the < > characters in text
+
+\usepackage{color,soul}
+\definecolor{highlight}{rgb}{1,1,0.6}
+\definecolor{link}{rgb}{0.5,0.0,0.0}
+\definecolor{cite}{rgb}{0.0,0.0,0.6}
+\definecolor{url} {rgb}{0.3,0.0,0.3}
+%\definecolor{grey}{rgb}{0.3,0.3,0.3}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+    colorlinks,
+    linkcolor={cite},
+    citecolor={cite},
+    urlcolor ={cite}
+}
+\usepackage{enumitem}
+\usepackage[british]{datetime2}
+
+\usepackage{tabularx}
+%\usepackage{array}
+\usepackage{multirow}
+\usepackage{booktabs}
+%\newcolumntype{L}{>{\raggedright\arraybackslash}p{3cm}}
+%\usepackage{dcolumn}
+%\usepackage{multicol}
+
+% % annotations environments % % 
+\newcommand{\note}[1]{\textit{\textcolor{red}{\{#1\}}}}
+\sethlcolor{highlight}
+
+
+\def\ojoin{\setbox0=\hbox{$\bowtie$}%
+  \rule[-.02ex]{.25em}{.4pt}\llap{\rule[\ht0]{.25em}{.4pt}}}
+\def\leftouterjoin{\mathbin{\ojoin\mkern-5.8mu\bowtie}}
+\def\rightouterjoin{\mathbin{\bowtie\mkern-5.8mu\ojoin}}
+\def\fullouterjoin{\mathbin{\ojoin\mkern-5.8mu\bowtie\mkern-5.8mu\ojoin}}
+
+
+%% PM Define authornote command for comments
+\newcommand{\authornote}[1] {
+    \begin{center}
+        \framebox{
+            {\begin{minipage}[t]{0.9\linewidth}
+                \raggedright  \textbf{[PM]}~ \scriptsize #1 \normalsize
+            \end{minipage}}
+    }
+    \end{center}
+}
+
+\usepackage{amssymb}
+\let\oldemptyset\emptyset
+\let\emptyset\varnothing
+
+\usepackage{bm}
+\usepackage{mathtools}
+\def\filtcap{\mathrel{%
+    \mathchoice{\FILTCAP}{\FILTCAP}{\scriptsize\FILTCAP}{\tiny\FILTCAP}%
+}}
+\def\FILTCAP{{%
+    \setbox0\hbox{$\cap$}%
+    \rlap{\hbox to \wd0{\hss$\circ$\hss}}\box0
+}}
+
+%\usepackage{datetime}
+%\usepackage[mark]{gitinfo2}
+
+\newcommand{\prov}{\mathit{prov}}
