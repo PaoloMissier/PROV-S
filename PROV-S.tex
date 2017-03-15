@@ -32,6 +32,7 @@
 
 
 \begin{document}
+%\lstset{language=Pyton}
 
 \special{papersize=8.5in,11in}
 \setlength{\pdfpageheight}{\paperheight}
@@ -103,6 +104,8 @@ This is the text of the abstract.
 \keywords
 keyword1, keyword2
 
+
+
 \section{Introduction}
 
 	\note{4-8 pages}
@@ -131,7 +134,129 @@ follow the transformation / action distinction from the Spark framework:
 \end{itemize}
 A further important distinction:  transformations can be either \textbf{stateless or stateful}.  Stateless only depend deterministically on the input stream, while stateful transformations (1) depend on internal state of the activity, and (2) may change the state. An example is a state that holds the “average daily temp”. The input is a stream of temp values through one day, the transformation filters out those that are above average by more than 2 std deviations. The surviving data points are used to update the internal daily average at the end of the day.
 
-With these distinctions, we describe PROV-S using a progression of:
+
+\section{PROV functional patterns}
+
+
+\subsection{Map}
+As a first example, consider computing the following map function on a list $x=[x_1 \dots x_n]$:
+\begin{equation}
+[y_1 \dots y_n] = \mathbf{map}(\lambda~ x. f(x), [x_1 \dots x_n])
+\label{eq:map}
+\end{equation} 
+The following PROV document \texttt{P-map} can be used to express the provenance of $y = [y_1 \dots y_n] $.
+\begin{quote}
+\texttt{P-map}: \\
+\verb|entity(f, [prov:type = `prov:plan'])| \\
+\verb|activity(a_1), wasAssociatedWith(a_1, _, f)| \\
+\verb|...| \\
+\verb|activity(a_n), wasAssociatedWith(a_n, _, f)|\\
+\verb|entity(x_1), ..., entity(x_n)| \\
+\verb|entity(y_1), ... ,entity(y_n)| \\
+\verb|used(a_1, x_1), wasGeneratedBy(y_1, a_1)| \\
+\verb|...| \\
+\verb|used(a_n, x_n), wasGeneratedBy(y_n, a_n)|
+\label{ex:map}
+\end{quote}
+
+%A more concise version of the provenance, which leaves $f()$ implicit, is captured by:
+%\begin{quote}
+%\noindent \verb|wasDerivedFrom(y_1, x_1)|\\
+%\verb|...| \\
+%\noindent \verb|wasDerivedFrom(y_n, x_n)|
+%\end{quote}
+The regularity in the assertions (except for the plan statement that defines \texttt{f}) reflects the semantics of the \texttt{map} function.
+We can exploit such regularities if we view the statements above as instances of a \textit{provenance template} \texttt{T-map}, which we can write as:
+\begin{quote}
+\texttt{T-map}: \\
+\verb|entity(f, [prov:type = `prov:plan'])| \\
+\verb|entity(x_v)|\\
+\verb|entity(y_v)| \\
+\verb|activity(a_v), wasAssociatedWith(a_v, _, f)| \\
+\verb|used(a_v, x_v), wasGeneratedBy(y_v, a_v)|
+\end{quote}
+Here \texttt{a\_v}, \texttt{x\_v}, \texttt{y\_v} are \textit{provenance variables}, which we can bind to actual provenance elements (entities, activities, or agents) to obtain the PROV document shown above.
+
+More precisely, we write \texttt{x\_v} $\leftarrow$ \texttt{foo} to denote the assignment of variable \texttt{x\_v} to a constant value \texttt{foo}.
+More generally, a binding $b$ is a set of assignments of values to variables, for instance:
+\[b = \langle \texttt{x\_v} \leftarrow \mathtt{foo}, \texttt{y\_v} \leftarrow \mathtt{bar} \rangle\]
+
+The \textit{application} 
+\[ P = \mathit{apply}(b,T)\]
+of a binding $b$ to a template $T$ is the lexical replacement of each occurrence of each variable $x$ in each statement of $T$ with the corresponding constant in its assignment. 
+Thus, assuming all variables in $T$ have an assignment in $b$, this generates a PROV document, $P$.
+
+By extension, we obtain a PROV document from a set $B$ of bindings, by applying each $b \in B$ to $T$:
+\[ P = \mathit{apply}(B,T)\]
+
+For the specific \texttt{map} invocation (\ref{eq:map}) above, we may specify the bindings \textit{intensionally},  as follows:
+\[ B = \{ \langle \texttt{a\_v} \leftarrow \texttt{gen}(\texttt{a},i), \texttt{x\_v} \leftarrow x[i], \texttt{y\_v} \leftarrow y[i]  \rangle | i:1 \dots n\}\]
+where $x[i]$, $y[i]$ are the actual elements of the input and output lists, respectively.
+Here the convenience function \texttt{gen(v,$i$)} simply generates a new constant from a seed, \texttt{v}, and a variable $i$, for instance \texttt{v\_i}.
+It is easy to see that document \texttt{P-map} above can be obtained by applying $B$ to \texttt{T-map}:
+\[ \texttt{P-map} = \mathit{apply}(B,\texttt{T-map})\]
+Essentially, using this approach the provenance of the output from a \texttt{map} transformation is described by the combination of two elements: (1) a provenance template, which captures the structure of the provenance graph, and (2) a set of bindings, which are defined for specific invocations of \texttt{map}.
+
+We can apply this idea to specify the provenance of data transformations through other common transformations and actions. As further simple examples, here we describe the patterns for \texttt{filter} and \texttt{reduce}.
+
+\subsection{Filter}
+
+\begin{equation}
+[y_1 \dots y_m] = \mathbf{filter}(\lambda~ x. p(x), [x_1 \dots x_n])
+\label{eq:filter}
+\end{equation} 
+where $p()$ is a predicate and $m\leq n$.
+The following \texttt{T-filter} template captures the provenance structure:
+\begin{quote}
+\texttt{T-filter}: \\
+\verb|entity(p, [prov:type = `prov:plan'])| \\
+\verb|entity(x_v), entity(y_v)| \\
+\verb|activity(p_v), wasAssociatedWith(p_v,_,p)| \\
+\verb|used(p_v,x_v), wasGeneratedBy(y_v,p_v)|
+\end{quote}
+For a specific invocation of \texttt{filter} as in (\ref{eq:filter}), we can define the set of bindings:
+\begin{align*}
+ B = \{ \langle & \texttt{p\_v} \leftarrow \texttt{gen}(\texttt{p},i), \texttt{x\_v} \leftarrow x[i], \texttt{y\_v} \leftarrow y[i]  \rangle \\
+                      & | i:1 \dots n \wedge p(x[i]) = \texttt{true}\}
+ \end{align*}
+ Again, it is straightforward to generate the PROV document:
+ \[\texttt{P-filter} = \mathit{apply}(\texttt{B-filter},\texttt{T-filter}) \] .
+ 
+ \subsection{Reduce}
+Unlike \texttt{map} and \texttt{filter} which are known in Spark as \item , the \texttt{reduce} operator is an \textit{action}, in the sense that it maps a list of elements to a different type of new data structure:
+\begin{equation}
+y = \mathbf{reduce}(\lambda~ a,b. f(a,b), [x_1 \dots x_n])
+\label{eq:reduce}
+\end{equation} 
+where $f(a,b)$ combines an accumulator $a$ with each new list input element $b$.
+
+The corresponding template  is very similar to \texttt{T-filter} and \texttt{T-map} above:
+\begin{quote}
+\texttt{T-reduce}: \\
+\verb|entity(f, [prov:type = `prov:plan'])| \\
+\verb|entity(x_v), entity(y_v)| \\
+\verb|activity(f_v), wasAssociatedWith(f_v,_,f)| \\
+\verb|used(f_v,x_v), wasGeneratedBy(y_v,f_v)|
+\end{quote}
+However, for \texttt{reduce} we need to express that the single output $y$ is generated by each invocation of $f(x_i)$.
+For this, we simply set the assignment to \texttt{y\_v} to be the same in each of the bindings:
+\begin{align*}
+ B = \{ \langle & \texttt{f\_v} \leftarrow \texttt{gen}(\texttt{f},i), \texttt{x\_v} \leftarrow x[i], \texttt{y\_v} \leftarrow y  \rangle \\
+                      & | i:1 \dots n\}
+ \end{align*}
+For  instance (\ref{eq:reduce}), $\mathit{apply}(B,\texttt{T-reduce})$ produces the PROV document:
+\begin{quote}
+\texttt{P-reduce}: \\
+\verb|entity(f, [prov:type = `prov:plan'])| \\
+\verb|entity(x_1) ... entity(x_n)| \\
+\verb|entity(y)| \\
+\verb|activity(f_i), wasAssociatedWith(f_i,_,f)| \\
+\verb|used(f_i,x_i), wasGeneratedBy(y,f_i)|
+\end{quote}
+
+
+
+\authornote{With these distinctions, we describe PROV-S using a progression of:
 \begin{description}
 \item[baseline:] non streaming cases is just a batch of data subject to a transformation or action activity. Here the input is one single entity. Nothing new here
 \item[input is a a stream of data.]  Initially cover the stateless case.      Here we have a provenance patterns that repeats over time. We show:
@@ -141,11 +266,15 @@ With these distinctions, we describe PROV-S using a progression of:
 \item we describe templates using \note{Vasa’s template framework}
 \item template instantiation rules capture the semantics of the transformation.
 \end{itemize}
+\end{description}
+}
 
-\note{show how this works for typical Spark transformations and actions, and then generalise to generic stateless activities that operate on streams.}
 
-\textbf{Extension to stateful case}:
+\section{PROV-S}
 
+\note{generalisation to streaming, where consumer is initially stateless, then a stateful black box}
+
+\authornote{
 the interesting bit here is that the internal state is \textit{itself an entity with provenance}.
 
 It is an entity that is /used/ by the activity every time the activity occurs (the function operates on a new input window).
@@ -153,69 +282,25 @@ It is an entity that is /used/ by the activity every time the activity occurs (t
 Its provenance reflects its updates over time.\\
 
 Demonstrate the combination of output provenance and state provenance using a query that shows how an output at a certain time t is described in terms of the combination of inputs up to time t and state evolution up to t.
-
-\section{The PROV-S pattern}
-
-\textbf{Simple cases to show the template + binding idea in action:}
-
-Map, filter are the most common functional transformations.
-
-Map: see Fig. \ref{fig:baseline-map}
-
-Filter: see Fig. \ref{fig:baseline-filter}
-
-Reduce (an action): see Fig. \ref{fig:baseline-reduce}
-
-
-\begin{figure}
-\centering
-\includegraphics[width=0.7\linewidth]{./figures/baseline-map}
-\caption{Provenance for non-streaming map operator}
-\label{fig:baseline-map}
-\end{figure}
-
-
-\begin{figure}
-\centering
-\includegraphics[width=0.7\linewidth]{./figures/baseline-filter}
-\caption{}
-\label{fig:baseline-filter}
-\end{figure}
-
-
-\begin{figure}
-\centering
-\includegraphics[width=0.7\linewidth]{./figures/baseline-reduce}
-\caption{}
-\label{fig:baseline-reduce}
-\end{figure}
-
-\textbf{Motivating scenario}. The \textit{taxi route} use case illustrates a complex black box transformation (explaining data marketplaces here may be too complex. may need to keep this abstract, but here is the figure anyways). See Fig. \ref{fig:taxi-routes-prov}
-
-\begin{figure}
-\centering
-\includegraphics[width=0.7\linewidth]{./figures/taxi-routes-prov}
-\caption{}
-\label{fig:taxi-routes-prov}
-\end{figure}
+}
 
 The general case for stateless black box aggregations:  see Fig. \ref{fig:black-box-aggregation-stateless}
 
-\begin{figure}
+\begin{figure*}
 \centering
 \includegraphics[width=0.7\linewidth]{./figures/black-box-aggregation-stateless}
-\caption{}
+\caption{PROV-S general pattern for stateless black box aggregations}
 \label{fig:black-box-aggregation-stateless}
-\end{figure}
+\end{figure*}
 
 This needs extending to a more stateful case: outputs depends on older inputs, and outputs may depend on different windows for different inputs: see Fig. \ref{fig:black-box-aggregation-stateful}
 
-\begin{figure}
-\centering
-\includegraphics[width=0.7\linewidth]{./figures/black-box-aggregation-stateful}
-\caption{}
-\label{fig:black-box-aggregation-stateful}
-\end{figure}
+%\begin{figure*}
+%\centering
+%\includegraphics[width=0.7\linewidth]{./figures/black-box-aggregation-stateful}
+%\caption{PROV-S general pattern for stateful black box aggregations}
+%\label{fig:black-box-aggregation-stateful}
+%\end{figure*}
 
 
 

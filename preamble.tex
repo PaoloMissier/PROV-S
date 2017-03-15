@@ -25,6 +25,7 @@
 
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+\usepackage{listings}
 
 \usepackage[hidelinks]{hyperref}
 \hypersetup{
@@ -81,7 +82,21 @@
     \rlap{\hbox to \wd0{\hss$\circ$\hss}}\box0
 }}
 
+
+\newcommand{\structurenote}[2] {
+    \begin{center}
+        \framebox{
+            \colorbox{purple!40}{\begin{minipage}[t]{0.9\linewidth}
+                \raggedright  \textbf{[#1]}~ \scriptsize #2 \normalsize
+            \end{minipage}}
+    }
+    \end{center}
+}
+
+
 %\usepackage{datetime}
 %\usepackage[mark]{gitinfo2}
 
 \newcommand{\prov}{\mathit{prov}}
+\newcommand{\provs}{\texttt{PROV-S}}
+\newcommand{\entity}{\texttt{entity}}
