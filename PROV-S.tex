@@ -55,18 +55,17 @@
 \setcopyright{acmlicensed}  % default
 %\setcopyright{rightsretained}
 
-\titlebanner{banner above paper title}        % These are ignored unless
-\preprintfooter{short description of paper}   % 'preprint' option specified.
+%\titlebanner{banner above paper title}        % These are ignored unless
+%\preprintfooter{short description of paper}   % 'preprint' option specified.
 
-\title{PROV-S: Provenance modelling for data streaming based on Templates\titlenote{with optional title note}}
-%\subtitle{Subtitle Text, if any\titlenote{with optional subtitle note}}
+\title{Provenance for data streaming based on Templates}
 
-\authorinfo{Name1\thanks{with optional author note}}
-           {Affiliation1}
-           {Email1}
-\authorinfo{Name2 \and Name3\thanks{with optional author note}}
-           {Affiliation2/3}
-           {Email2/3}
+\authorinfo{Paolo Missier}
+           {School of Computing Science \\ Newcastle University, UK}
+           {paolo.Missier@ncl.ac.uk}
+\authorinfo{Vasa Curcin}
+           {King's College London, UK}
+           {vasa.curcin@kcl.ac.uk}
 
 \maketitle
 
@@ -107,8 +106,6 @@ keyword1, keyword2
 
 
 \section{Introduction}
-
-	\note{4-8 pages}
 	
 \authornote{
 \textbf{Goal: }we want to characterise provenance where entities are multiple data streams and activities are aggregators over the streams.
@@ -117,69 +114,96 @@ keyword1, keyword2
 
 Example of relevant application: tracking flows of (personal) data from IoT devices. An increasingly pervasive form of moving data. Tracking is important because it enables forms of reward / credit by traversing back one or more derivation steps \note{see Paolo's IJDC paper on transitive credit}
 
-The main contribution of the (short) paper is  a conceptual model to express provenance of streaming data as it goes through analytics machines (ie aggregations operators). 
-Following emerging standards in functional-style stream processing, ie. Spark, we start with standard \textit{transformations} and \textit{actions} over streams, then we propose a more general pattern, that we call PROV-S, by extending PROV slightly. \\
+... or choose any IoT-related example...\\
+
+We aim to provide a mechanism for continually generating provenance assertions that account for the processing of an input data stream (more generally, a collection of input streams) through a black box transformation.
+
+
+The main contribution of the (short) paper is  a framework for expressing provenance of streaming data as it goes through analytics machines (ie aggregations operators). 
 }
 
 \authornote{
-\textbf{Interesting points to cover:}
+\textbf{a few points to cover:}
 \begin{itemize}
-\item PROV-S deals with both stateless and stateful transformations \note{this is a fairly standard distinction, which Spark streaming makes very clearly}
-\item realisation: PROV-S combines PROV with a provenance template mechanism \note{cite}, where variables are bound to stream data to continuously produce provenance documents
-\item aggregation is a form of data transformation that destroys data identity. what are the implications? after the transformation the data is completely new, but its lineage should contain enough info to allow for the proportion of each input stream to be calculated. 
+\item the framework deals with both stateless and stateful transformations \note{this is a fairly standard distinction, which Spark streaming makes very clearly}
+\item aggregation is a form of data transformation that destroys data identity. after the transformation the data is completely new, but its lineage should contain enough info to allow for the proportion of each input stream to be calculated. 
 \end{itemize}
 }
 
 
 \authornote{
 \textbf{Sketch for a formalisation:}
-follow the transformation / action distinction from the Spark framework:
-\begin{itemize}
-\item transformations map RDDs (collections) to other RDDs. We cover filter, map, and ?? as exemplars
-\item  actions map RDDs to non-RDD data structures. These are typically grouping followed by aggregation functions, and we illustrate that using reduce as the exemplar 
-\end{itemize}
-A further important distinction:  transformations can be either \textbf{stateless or stateful}.  Stateless only depend deterministically on the input stream, while stateful transformations (1) depend on internal state of the activity, and (2) may change the state. An example is a state that holds the “average daily temp”. The input is a stream of temp values through one day, the transformation filters out those that are above average by more than 2 std deviations. The surviving data points are used to update the internal daily average at the end of the day.
+transformations can be either \textbf{stateless or stateful}.  Stateless only depend deterministically on the input stream, while stateful transformations (1) depend on internal state of the activity, and (2) may change the state. An example is a state that holds the “average daily temp”. The input is a stream of temp values through one day, the transformation filters out those that are above average by more than 2 std deviations. The surviving data points are used to update the internal daily average at the end of the day.
 }
 
-We aim to provide a mechanism for continually generating provenance assertions that account for the processing of an input data stream (more generally, a collection of input streams) through a black box transformation.
+\subsection{Relate work}  \label{sec:related}
 
-Following current practice, for instance in the Spark framework \cite{SPARK}, a stream is viewed as an unbound sequence of discrete data items, or \textit{tokens}. A token is defined as the content of the stream over a pre-defined \textit{batch interval} (which is configurable).
+\note{Vasa??}
 
-With this convention, we denote a stream transformation pattern as:
-\[  \os = P_s(\is_1 \dots \is_n) \]
-indicating that the stream-oriented process $P_s$ continuously operates on $n$ input streams $\is_1 \dots \is_n$, producing output stream $\os$.
+\section{Provenance generation framework}
 
-\authornote{
-We observe that these assertions follow a regular pattern, namely for each batch interval, each output token is derived from a set of input tokens through the same transformation (the black box).
-Following this idea, we propose that the mechanism for producing continuous provenance be based on a combination of (i) a provenance template, which describes the structure of a generic input-output derivation 
-
-
-\begin{description}
-\item[baseline:] non streaming cases is just a batch of data subject to a transformation or action activity. Here the input is one single entity. Nothing new here
-\item[input is a a stream of data.]  Initially cover the stateless case.      Here we have a provenance patterns that repeats over time. We show:
-\begin{itemize}
-\item the provenance pattern instantiated on just one token, or perhaps one window, from the stream. This is extensional.  Show on one example.
-\item  how the extensional graph can be generated by a combination of (1) provenance graph template and (2) template instantiation rules.
-\item we describe templates using \note{Vasa’s template framework}
-\item template instantiation rules capture the semantics of the transformation.
-\end{itemize}
-\end{description}
-}
-
-
-
-\section{PROV functional patterns}
-
-
-\subsection{Map}
-As a first example, consider computing the following map function on a list $x=[x_1 \dots x_n]$:
+To introduce our framework, we start from the case of a batch, ``black box'' process P, for example a service or software component with an interface that defines $n$ inputs and $m$ outputs, but unknown internal behaviour.
+We use function call notation to denote an invocation of $P$:
 \begin{equation}
-[y_1 \dots y_n] = \mathbf{map}(\lambda~ x. f(x), [x_1 \dots x_n])
-\label{eq:map}
-\end{equation} 
-The following PROV document \texttt{P-map} can be used to express the provenance of $y = [y_1 \dots y_n] $.
+\langle y_1 \dots y_m \rangle = P(x_1, \dots x_n)
+\label{eq:P}
+\end{equation}
+As our initial example we use a process $P$ that takes a single, list-valued input $x = [x_1 \dots x_n]$ and produces one list-valued output $y = [y_1 \dots y_n]$ of the same size:
+\begin{equation}
+\langle [y_1 \dots y_n] \rangle = P([x_1 \dots x_n])
+ \label{eq:P-inv}
+\end{equation}
+Unless something is known about the internal workings of $P$, the provenance of the $y_i$ is unknown. 
+In fact, by default we cannot even claim derivation relationships of the form: \verb|y_i wasDerivedFrom x_j|.
+
+We propose a simple provenance generation framework that enables the provenance of the $y_j$ to be asserted, despite $P$ being a black box.
+Furthermore, later in this short paper we show that the framework also captures the case where $P$ computes continuously when its inputs are data streams. 
+
+\subsection{General framework}
+
+The framework consists of the following elements.\\
+
+\noindent \textbf{1. A provenance template.} This is a PROV document $T$ where provenance variables may appear in lieu of constant elements, namely the identifiers for some of the Entities, Activities, and Agents, as well as some of their properties.
+The following is an example of provenance template:
 \begin{quote}
-\texttt{P-map}: \\
+$\mathit{T1}$: \\
+\verb|entity(f, [prov:type = `prov:plan'])| \\
+\verb|entity(:x)|\\
+\verb|entity(:y)| \\
+\verb|activity(:a), wasAssociatedWith(:a,_,f)| \\
+\verb|used(:a,:x), wasGeneratedBy(:y,:a)| \\
+\verb|wasDerivedFrom(:y,:x)|
+\end{quote}
+We use ':x' to indicate that 'x' should be interpreted as a variable.\\
+
+\noindent \textbf{2. A Binding.} This is a set $B =  \{ b_1 \dots b_k \}$ of assignments of constant values to variables.
+An assignment $b \in B $ has the form 
+\[b = \langle \mathtt{:v_1} \leftarrow \mathtt{c_1}, \mathtt{:v_2} \leftarrow \mathtt{c_2} \dots \rangle\]
+and defines a substitution of the variables $\mathtt{:v_i}$ to valid PROV constants.\\
+
+\noindent \textbf{3. A binding-generation process $P^B$,} which we refer to as a \textit{sidecar} process, which generates a binding $B$ for each invocation of $P$ using the invocation's inputs and outputs:
+\begin{equation}
+B = P^B(\langle \mathtt{P~inputs} \rangle, \langle \mathtt{P~outputs} \rangle)
+\label{eq:B}
+\end{equation}
+
+For example, given invocation (\ref{eq:P-inv})  and the variables defined in template $T$ above, $P^B$ might generate the following binding (which we express intensionally using set notation for conciseness):
+\[ \mathit{B1} = \{ \langle \texttt{:a} \leftarrow \texttt{gen}(\texttt{a},i), \texttt{:x} \leftarrow x_i, \texttt{:y} \leftarrow y_i  \rangle | i:1 \dots n\}\]
+Here we have used the convenience token generator \texttt{gen(a,$i$)}, which simply generates a new constant from a seed, \texttt{a}, and a variable $i$, for instance \texttt{a\_i}.
+
+Note that in this binding, values $x_i, y_i$ in the same position $i$ are simultaneously assigned to variables \texttt{:x}, \texttt{:y}, along with a new constant formed from seed token \texttt{a}.
+Note also that what is actually assigned to a variable is the Id of a PROV Entity that represent the data, i.e., $x_i$ will be represented by an Entity and given some unique identifier. For simplicity of notation we leave this id-generation step implicit.
+
+\noindent \textbf{4. A function $\apply(B,T)$} that generates a PROV document by applying $B$ to $T$.
+Specifically:
+for provenance statement $s$ in $T$,  a \textit{ground} version of $s$ for  assignment $b$, denoted $s/b$, is obtained by lexically replacing each occurrence of variable 
+$\mathtt{:v}$ in $s$ by value $\mathtt{c}$ whenever $\mathtt{:v} \leftarrow \mathtt{c}$ is defined in $b$.
+
+$\apply(B,T)$ generates the set of all statements $s/b$ for each $s \in T$ and for each $b \in B$.
+Note that, by iterating over each $b \in B$, this process may generate multiple ground versions of some of the statements in $T$.\footnote{It may also be the case that the \textit{same} ground statement can be generated more than once. In this case we simply assume that only one instance is kept.}
+For instance, $\apply(\mathit{B1},\mathit{T1})$ takes template $T1$ and binding $B1$ in our earlier example, and produces the following PROV document:
+\begin{quote}
+$P1$: \\
 \verb|entity(f, [prov:type = `prov:plan'])| \\
 \verb|activity(a_1), wasAssociatedWith(a_1, _, f)| \\
 \verb|...| \\
@@ -188,52 +212,26 @@ The following PROV document \texttt{P-map} can be used to express the provenance
 \verb|entity(y_1), ... ,entity(y_n)| \\
 \verb|used(a_1, x_1), wasGeneratedBy(y_1, a_1)| \\
 \verb|...| \\
-\verb|used(a_n, x_n), wasGeneratedBy(y_n, a_n)|
+\verb|used(a_n, x_n), wasGeneratedBy(y_n, a_n)| \\
+\verb|wasDerivedFrom(y_1,x_1)| \\
+\verb|...| \\
+\verb|wasDerivedFrom(y_n,x_n)| 
 \label{ex:map}
 \end{quote}
 
-%A more concise version of the provenance, which leaves $f()$ implicit, is captured by:
-%\begin{quote}
-%\noindent \verb|wasDerivedFrom(y_1, x_1)|\\
-%\verb|...| \\
-%\noindent \verb|wasDerivedFrom(y_n, x_n)|
-%\end{quote}
-The regularity in the assertions (except for the plan statement that defines \texttt{f}) reflects the semantics of the \texttt{map} function.
-We can exploit such regularities if we view the statements above as instances of a \textit{provenance template} \texttt{T-map}, which we can write as:
-\begin{quote}
-\texttt{T-map}: \\
-\verb|entity(f, [prov:type = `prov:plan'])| \\
-\verb|entity(x_v)|\\
-\verb|entity(y_v)| \\
-\verb|activity(a_v), wasAssociatedWith(a_v, _, f)| \\
-\verb|used(a_v, x_v), wasGeneratedBy(y_v, a_v)|
-\end{quote}
-Here \texttt{a\_v}, \texttt{x\_v}, \texttt{y\_v} are \textit{provenance variables}, which we can bind to actual provenance elements (entities, activities, or agents) to obtain the PROV document shown above.
+One can recognise that $P1$ is in fact a representation of the repeated application of a function $f$ to each element of input list $[x_1 \dots x_n]$, producing output list $[y_1 \dots y_n]$.
+In other words, in this example $P$ is simply a \texttt{map} transformation:
+\begin{equation}
+[y_1 \dots y_n] = \mathbf{map}(\lambda~ x. f(x), [x_1 \dots x_n])
+\label{eq:map}
+\end{equation}
 
-More precisely, we write \texttt{x\_v} $\leftarrow$ \texttt{foo} to denote the assignment of variable \texttt{x\_v} to a constant value \texttt{foo}.
-More generally, a binding $b$ is a set of assignments of values to variables, for instance:
-\[b = \langle \texttt{x\_v} \leftarrow \mathtt{foo}, \texttt{y\_v} \leftarrow \mathtt{bar} \rangle\]
+Noting that useful analytics tasks can be obtained by composing common functional transformations, for completeness we now show the framework in action on two other such transformations, namely \texttt{filter} and \texttt{reduce}.
 
-The \textit{application} 
-\[ P = \mathit{apply}(b,T)\]
-of a binding $b$ to a template $T$ is the lexical replacement of each occurrence of each variable $x$ in each statement of $T$ with the corresponding constant in its assignment. 
-Thus, assuming all variables in $T$ have an assignment in $b$, this generates a PROV document, $P$.
-
-By extension, we obtain a PROV document from a set $B$ of bindings, by applying each $b \in B$ to $T$:
-\[ P = \mathit{apply}(B,T)\]
-
-For the specific \texttt{map} invocation (\ref{eq:map}) above, we may specify the bindings \textit{intensionally},  as follows:
-\[ B = \{ \langle \texttt{a\_v} \leftarrow \texttt{gen}(\texttt{a},i), \texttt{x\_v} \leftarrow x[i], \texttt{y\_v} \leftarrow y[i]  \rangle | i:1 \dots n\}\]
-where $x[i]$, $y[i]$ are the actual elements of the input and output lists, respectively.
-Here the convenience function \texttt{gen(v,$i$)} simply generates a new constant from a seed, \texttt{v}, and a variable $i$, for instance \texttt{v\_i}.
-It is easy to see that document \texttt{P-map} above can be obtained by applying $B$ to \texttt{T-map}:
-\[ \texttt{P-map} = \mathit{apply}(B,\texttt{T-map})\]
-Essentially, using this approach the provenance of the output from a \texttt{map} transformation is described by the combination of two elements: (1) a provenance template, which captures the structure of the provenance graph, and (2) a set of bindings, which are defined for specific invocations of \texttt{map}.
-
-We can apply this idea to specify the provenance of data transformations through other common transformations and actions. As further simple examples, here we describe the patterns for \texttt{filter} and \texttt{reduce}.
 
 \subsection{Filter}
 
+A \texttt{filter} transformation is of the form:
 \begin{equation}
 [y_1 \dots y_m] = \mathbf{filter}(\lambda~ x. p(x), [x_1 \dots x_n])
 \label{eq:filter}
@@ -243,87 +241,202 @@ The following \texttt{T-filter} template captures the provenance structure:
 \begin{quote}
 \texttt{T-filter}: \\
 \verb|entity(p, [prov:type = `prov:plan'])| \\
-\verb|entity(x_v), entity(y_v)| \\
-\verb|activity(p_v), wasAssociatedWith(p_v,_,p)| \\
-\verb|used(p_v,x_v), wasGeneratedBy(y_v,p_v)|
+\verb|entity(:x), entity(:y)| \\
+\verb|activity(:p), wasAssociatedWith(:p,_,p)| \\
+\verb|used(:p,:x), wasGeneratedBy(:y,:p)| \\
+\verb|wasDerivedFrom(:y,:x)| \\
 \end{quote}
-For a specific invocation of \texttt{filter} as in (\ref{eq:filter}), we can define the set of bindings:
+For  invocation (\ref{eq:filter}), a sidecar process $\mathtt{filter}^B$ must be defined to generate the following binding:
 \begin{align*}
- B = \{ \langle & \texttt{p\_v} \leftarrow \texttt{gen}(\texttt{p},i), \texttt{x\_v} \leftarrow x[i], \texttt{y\_v} \leftarrow y[i]  \rangle \\
-                      & | i:1 \dots n \wedge p(x[i]) = \texttt{true}\}
+ B = \{ \langle & \texttt{:p} \leftarrow \texttt{gen}(\texttt{p},i), \texttt{:x} \leftarrow x_i, \texttt{:y} \leftarrow y_i  \rangle \\
+                      & | i:1 \dots n \wedge p(x_i) = \texttt{True}\}
  \end{align*}
- Again, it is straightforward to generate the PROV document:
- \[\texttt{P-filter} = \mathit{apply}(\texttt{B-filter},\texttt{T-filter}) \] .
+For this invocation, assuming for instance that $p$ evaluates to \texttt{True} only on $x_1, x_3$, $\mathit{apply}(\texttt{B-filter},\texttt{T-filter})$ results in the following PROV document:
+\begin{quote}
+\texttt{P-filter}: \\
+\verb|entity(p, [prov:type = `prov:plan'])| \\
+\verb|entity(x_1), entity(y_1)| \\
+\verb|activity(p_1), wasAssociatedWith(p_1,_,p)| \\
+\verb|used(p_1,x_1), wasGeneratedBy(y_1,p_1)| \\
+\verb|wasDerivedFrom(y_1,x_1)| \\
+\verb|entity(x_3), entity(y_3)| \\
+\verb|activity(p_3), wasAssociatedWith(p_3,_,p)| \\
+\verb|used(p_3,x_3), wasGeneratedBy(y_3,p_3)| \\
+\verb|wasDerivedFrom(y_3,x_3)| \\
+\end{quote}
+
  
  \subsection{Reduce}
-Unlike \texttt{map} and \texttt{filter} which are known in Spark as transformations, the \texttt{reduce} operator is an \textit{action}, in the sense that it maps a list of elements to a different type of new data structure:
+The \texttt{reduce} operator maps a list of elements to a different type of new data structure:
 \begin{equation}
 y = \mathbf{reduce}(\lambda~ a,b. f(a,b), [x_1 \dots x_n])
 \label{eq:reduce}
 \end{equation} 
-where $f(a,b)$ combines an accumulator $a$ with each new list input element $b$.
-
-The corresponding template  is very similar to \texttt{T-filter} and \texttt{T-map} above:
+where $f(a,b)$ combines an accumulator $a$ with each new list input element $b$, producing a new value for $a$.
+%
+The corresponding template  is very similar to \texttt{T-filter} and \texttt{T1} above:
 \begin{quote}
 \texttt{T-reduce}: \\
 \verb|entity(f, [prov:type = `prov:plan'])| \\
-\verb|entity(x_v), entity(y_v)| \\
-\verb|activity(f_v), wasAssociatedWith(f_v,_,f)| \\
-\verb|used(f_v,x_v), wasGeneratedBy(y_v,f_v)|
+\verb|entity(:x), entity(:y)| \\
+\verb|activity(:f), wasAssociatedWith(:f,_,f)| \\
+\verb|used(:f,:x), wasGeneratedBy(:y,:f)| \\
+\verb|wasDerivedFrom(:y,:x)|
 \end{quote}
-However, for \texttt{reduce} we need to express that the single output $y$ is generated by each invocation of $f(x_i)$.
-For this, we simply set the assignment to \texttt{y\_v} to be the same in each of the bindings:
+However, for \texttt{reduce} we need to express the fact that the single output $y$ is generated at the end of each invocation of $f(x_i)$, and is derived from each $x_i$.
+For this, we set the assignment to \texttt{:y} to be the same in each of the bindings:
 \begin{align*}
- B = \{ \langle & \texttt{f\_v} \leftarrow \texttt{gen}(\texttt{f},i), \texttt{x\_v} \leftarrow x[i], \texttt{y\_v} \leftarrow y  \rangle \\
+ B = \{ \langle & \texttt{:f} \leftarrow \texttt{gen}(\texttt{f},i), \texttt{:x} \leftarrow x_i, \texttt{:y} \leftarrow y  \rangle \\
                       & | i:1 \dots n\}
  \end{align*}
-For  instance (\ref{eq:reduce}), $\mathit{apply}(B,\texttt{T-reduce})$ produces the PROV document:
+$\mathit{apply}(B,\texttt{T-reduce})$ produces the PROV document:
 \begin{quote}
 \texttt{P-reduce}: \\
 \verb|entity(f, [prov:type = `prov:plan'])| \\
 \verb|entity(x_1) ... entity(x_n)| \\
 \verb|entity(y)| \\
 \verb|activity(f_i), wasAssociatedWith(f_i,_,f)| \\
-\verb|used(f_i,x_i), wasGeneratedBy(y,f_i)|
+\verb|used(f_i,x_i), wasGeneratedBy(y,f_i)| \\
+\verb|wasDerivedFrom(y,x_i)|
 \end{quote}
 
+Lastly, as an example of multi-input process, consider the case of a \texttt{join} operator, which is available on frameworks such as Spark to combine two inputs according to the usual join semantics:
+$z = \mathbf{join}(x,y)$.
+
+A straightforward template, following the pattern shown above, reflects the dependence of each element of $y$ from corresponding input pair $\langle x_i, y_i \rangle$, and is omitted for brevity.
+ 
+\subsection{Sidecar process specification and execution}
+
+So far we have introduced a framework that identifies the elements required to generate provenance from an arbitrary black box process $P$, and we have shown that it applies in particular to a common case of functional transformation.
+
+To summarise, given $P$ with a known signature but otherwise unknown semantics, one should define: (i) a template $T$ and (ii) a binding generator process $P^B$.
+The latter is a \textit{sidecar} process, in the sense that it must be executed for every invocation of the main process $P$.
+%
+
+The specifications of the template and sidecar process reflect the available knowledge of the input/output dependencies through $P$, even when $P$ itself maybe a black box.
+If nothing at all is known about these dependencies, then clearly no provenance will be available and the framework will not help much.
+On the other hand, the examples above show that, when $P$ has a well-defined semantics, it may be possible to capture enough of it in the template/sidecar pair, so that meaningful provenance can be generated. 
+
+\note{as seen in the examples, the sidecar process may end up encoding some elements of the process logic itself!}
+
+Either way, we believe that this simple framework can be useful to separate out the specification of a possibly complex function, for example, an entire analytics pipeline, from the specification, hopefully simpler, of the input/output dependencies through the function.
+%
+For instance, details of $P$ such as the lambda functions and predicates in our examples may not be available. 
+In those cases, a template specification that is less precise than the ones given above, but possibly still useful, is one that only asserts derivation relationships, such as this simplified version of \texttt{T1}:
+%
+\begin{quote}
+\verb|entity(:x), entity(:y), wasDerivedFrom(:y,:x)|
+\end{quote}
+
+A further concern is the implementation, deployment, and invocation of sidecar processes.
+While we envision an abstract API to let $P^B$ access the current inputs and outputs of $P$ as required (see \ref{eq:B}), i.e., \texttt{getInputs()}, \texttt{getOutputs()}, 
+the implementation of such API and the execution of $P^B$ must be supported by, and usually require ad hoc instrumentation of, $P$'s runtime environment. 
+The problem of implementing provenance capture sub-systems has been broadly investigated in the past, for instance: 
+(\cite{FRESCO}, \cite{noWorkflow}, \cite{Rlib}, \cite{Taverna provenance} \cite{VisTrails}, \cite{eSc provenance}, \cite{Kepler provenance}, \cite{SPADE}), and more recently for Spark \cite{Titian}.
+The issue of adapting some of these systems to support sidecar processes is beyond the scope of this short paper.
+
+\section{Application to stream data processing}  \label{sec:streaming}
+
+So far we have  assumed that $P$ is a batch process.
+However, the framework is perhaps most useful when $P$'s inputs and outputs are data streams, as then it can be used to generate a continuous stream of provenance assertions, to parallel the data stream produced by $P$.
+%
+To make a concrete case, we use the Spark Streaming model as reference \cite{spark-streaming-oreillybook}. 
+Spark Streaming uses a \textit{micro-batch} architecture, whereby a streaming computation is achieved through a sequence of batch computations, each operating on a fragment of the stream defined by a configurable \textit{batch interval}. 
+Each micro-batch consists of a finite sequence of data structures (RDDs, Spark's main data abstraction), known as a DStream.
+
+For our purposes, we may view a DStream within each batch as a list of values, like those we have used in our batch examples. 
+Thus, just as it allows Spark Streaming to reuse most of its RDD transformation and action operators, micro-batching also makes our framework reusable for generating provenance over streams.
+Spark also supports \textit{windows} as application-friendly abstractions over streams. A window is simply a sequence of contiguous micro-batches, and a breakdown of the stream into windows is specified in the usual way, namely by a combination of window size (the number of micro-batches) and sliding duration.
+
+In this setting, the template $T$ is defined so that it applies to each window, and the sidecar process executes once for each window, producing a \textit{stream of bindings} $B_1, B_2, \dots$.
+Correspondingly, this triggers a sequence of calls: $\apply(B_1,T), \apply(B_2,T), \dots$, resulting in a stream of provenance statements alongside the corresponding data input and output streams.
+
+Note that each of the batch process examples above can be mapped to a streaming setting without changes, as long as the scope of $P$ is restricted to a single window. 
+In Spark, for instance, by default the scope of a \texttt{reduce} operation performed on a stream is the list of items within the window. 
+This ensures that the \texttt{T-reduce} template in the previous Section, along with the corresponding sidecar process, produce the correct PROV documents, i.e., each new output $y$ produced upon completion of a window only depends on the inputs $x_1 \dots x_n$ within that window.
+%
+This limitation, however, can be removed by making Spark streaming computations stateful, that is, by having each micro-batch processing depend on a state that is defined but the previous batches.
+
+We address the case of stateful transformations (either batch or streaming) next.
+
+
+\section{Extension to stateful processes}  \label{sec:stateful}
+
+All the examples given so far are of \textit{stateless} transformations, where the bindings generated by the sidecar processes only involve inputs and output values.
+In contrast, \textit{stateful} transformations depend on some internal state, which may change as part of one invocation.
+%
+A simple example is a process $P$ that keeps a daily average of values for a stock, and generates an alert every time the current value is far from the current average.
+As $P$ keeps an internal state that determines the values in the output stream, the provenance of each output is derived from the current state, as well from a specific input.
+Furthermore, the state itself is updated at the end of each day, using the daily time series of stock values as well as the old state.
+
+We are going to model this scenario by recording the provenance of the state itself, i.e., by considering the state as a PROV Entity and including it in the framework.
+
+To illustrate the idea, let us assume that during a-one day window, $n$ stock values $[x_1 \dots x_n]$ are processed, and $m$ alerts $[y_1 \dots y_m]$ are generated.
+We represent the sequence of states, that is, the daily averages, using a progression of Entity IDs: \texttt{s\_1}, \texttt{s\_2}, ... and the corresponding state-changing activities using 
+\texttt{avg\_1}, \texttt{avg\_2}, ..., which are all associated with the same \texttt{avg} plan.
+At the end of each day, a new PROV document would be generated. 
+Thus, for instance at the end of day 10 the following document would be produced:
+\begin{quote}
+\texttt{P-state}:\\
+\verb|# each output is derived from state s_10| \\
+\verb|entity(y_1) ... entity(y_m)| \\
+\verb|wasDerivedFrom(y_1,s_10) ... |\\
+\verb|wasDerivedFrom(y_m,s_10) | \\
+\verb|# new Entity is introduced for the new state| \\
+\verb|entity(s_11)| \\
+\verb|# the new state depends on all inputs |\\
+\verb|# as well as the old state:| \\
+\verb|entity(avg,_,[prov:type='prov:plan'])| \\
+\verb|activity(avg_11)| \\
+\verb|wasAssociatedWith(avg11,_,avg)|  \\ 
+\verb|used(avg11,x_1) ... used(avg11,x_n)| \\
+\verb|used(avg11,s_10)| \\
+\verb|wasGeneratedBy(s_11,avg_10)| \\
+\verb|wasDerivedFrom(s_11,x_1) ... | \\
+\verb|wasDerivedFrom(s_11,x_n) ... | \\
+\verb|wasDerivedFrom(s_11,s_10) |
+\end{quote}
+Here is a possible template from which such a document can be generated:
+\begin{quote}
+\texttt{P-state}:\\
+\verb|entity(:y)| \\
+\verb|wasDerivedFrom(:y,:s_old)|\\
+%\verb|wasDerivedFrom(:y,:x)|\\
+\verb|entity(avg,_,[prov:type='prov:plan'])| \\
+\verb|activity(:avg_act)| \\
+\verb|wasAssociatedWith(:avg_act,_,avg)|  \\ 
+\verb|used(:avg_act,:x)| \\
+\verb|used(:avg_act,:s_old)| \\
+\verb|entity(:s_new)| \\
+\verb|wasGeneratedBy(:s_new,:avg_act)| \\
+\verb|wasDerivedFrom(:s_new,:x)| \\
+\verb|wasDerivedFrom(:s_new,:s_old) |
+\end{quote}
+
+The corresponding binding $B$, generated by the sidecar process $P^B$ (recall that $B$ applies to each window) is now more involved than in past examples, as it needs to generate assignments for the \texttt{:x} and \texttt{:y} variables, as well as for the old and new states, \texttt{:s\_old} and \texttt{:s\_new}.
+Furthermore, the process must also generate a new Entity ID for the state Entity each time it is invoked, to keep track of state changes, i.e. \texttt{s\_1}, \texttt{s\_2}, ...
+For this, we assume it can persistently store a counter, which can be recalled (\texttt{getStateEntityID()}) as well as incremented \& returned (\texttt{incStateEntityID()}).
+
+With these observations, we represent a binding as the union of three sets of assignments, each concerned with $y$, $x$, and the state, respectively:
+\begin{align*}
+B = & \{ \langle  \texttt{:y} \leftarrow y_i | i: 1 \dots m \rangle \} ~\cup \\
+		 &  \{ \langle \texttt{:x} \leftarrow x_j,  \texttt{:avg\_act} \leftarrow \texttt{gen}(\texttt{avg},j) \rangle |~ j:1 \dots n  \} ~\cup \\
+		 &\{ \langle \texttt{:s\_old} \leftarrow \texttt{getStateEntityId()}, \\
+		 &  \texttt{:s\_new} \leftarrow \texttt{incStateEntityId()}  \rangle \}
+ \end{align*}
 
 
 
 
-\section{PROV-S}
+\section{Extensions, implementation, and validation}
 
-\note{generalisation to streaming, where consumer is initially stateless, then a stateful black box}
+\note{the last example shows a limitation of the simple framework. hard to separate assignments that pertain to different sets of entities and relationships}
 
-\authornote{
-the interesting bit here is that the internal state is \textit{itself an entity with provenance}.
+\note{1 binding / 1 template is limiting. generalise to multiple $\langle B, T \rangle$ pairs. So there are multiple templates, and the sidecar process generates one one binding per template (not all templates may have a binding, in which case they are \textit{inactive}.  Illustrate this to produce a better version of the last example. One binding may deal with state change, another just with the I/O.}.
 
-It is an entity that is /used/ by the activity every time the activity occurs (the function operates on a new input window).
-
-Its provenance reflects its updates over time.\\
-
-Demonstrate the combination of output provenance and state provenance using a query that shows how an output at a certain time t is described in terms of the combination of inputs up to time t and state evolution up to t.
-}
-
-The general case for stateless black box aggregations:  see Fig. \ref{fig:black-box-aggregation-stateless}
-
-\begin{figure*}
-\centering
-\includegraphics[width=0.7\linewidth]{./figures/black-box-aggregation-stateless}
-\caption{PROV-S general pattern for stateless black box aggregations}
-\label{fig:black-box-aggregation-stateless}
-\end{figure*}
-
-This needs extending to a more stateful case: outputs depends on older inputs, and outputs may depend on different windows for different inputs: see Fig. \ref{fig:black-box-aggregation-stateful}
-
-%\begin{figure*}
-%\centering
-%\includegraphics[width=0.7\linewidth]{./figures/black-box-aggregation-stateful}
-%\caption{PROV-S general pattern for stateful black box aggregations}
-%\label{fig:black-box-aggregation-stateful}
-%\end{figure*}
-
-
+\verb|# each y_i is also derived from some single input| \\
+\verb|wasDerivedFrom(y_1,x_...) ... |\\
+\verb|wasDerivedFrom(y_m,x_...)| 
 
 
 \section{Appendix Title}
