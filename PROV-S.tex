@@ -70,7 +70,13 @@
 \maketitle
 
 \begin{abstract}
-This is the text of the abstract.
+Data Scientists insist that valuable knowledge can be extracted from primary data sources through complex data analytics applications.
+Metadata experts tend to agree, but they also point out that capturing the detailed provenance of such knowledge is key to establishing its trust, and thus to asserting its value --- be it scientific or commercial.
+However, two elements combine to making the systematic recording of detailed provenance challenging in an analytics setting.
+Firsty, complex analytics pipelines tend to be opaque to the detailed observation of their internal workings, which is a condition for recording the provenance of its outcomes. Secondly, much of the interesting primary data for analytics increasingly comes in the form of streams, for instance from sensors and Internet of Things devices, 
+and yet provenance recorders are not generally designed to operate on streams.
+In this short paper we propose that both issues can be addressed in a principled way, using a combination of provenance templates and simple meta-processes that  instantiate the templates when are executed alongside the main analytics.
+Using these mechanisms, we show that the provenance of the outputs from analytics that operate on streams is itself naturally represented as a stream of provenance assertions.
 \end{abstract}
 
 % 2012 ACM Computing Classification System (CSS) concepts
@@ -136,7 +142,7 @@ The main contribution of the (short) paper is  a framework for expressing proven
 transformations can be either \textbf{stateless or stateful}.  Stateless only depend deterministically on the input stream, while stateful transformations (1) depend on internal state of the activity, and (2) may change the state. An example is a state that holds the “average daily temp”. The input is a stream of temp values through one day, the transformation filters out those that are above average by more than 2 std deviations. The surviving data points are used to update the internal daily average at the end of the day.
 }
 
-\subsection{Relate work}  \label{sec:related}
+\subsection{Related work}  \label{sec:related}
 
 \note{Vasa??}
 
