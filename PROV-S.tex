@@ -144,7 +144,15 @@ transformations can be either \textbf{stateless or stateful}.  Stateless only de
 
 \subsection{Related work}  \label{sec:related}
 
-\note{Vasa??}
+
+\authornote{
+\cite{Sansrimahachai2012} developed a provenance framework for streaming data using Stream Ancestor Function, a reverse mapping function used to express precise dependencies between input and output stream elements. They introduced an optimised coarse-grained provenance collection, reducing storage requirements, and provided a stream provenance query and replay execution algorithms.
+
+Coarse-grained provenance collection techniques for low-overhead scientific stream processing have been considered in \cite{Vijayakumar2006}. A rule-based provenance model was designed for sensor streams, with each operation having a set of associated rules \cite{Misra}. An alternative approach was to augment coarse-grained provenance with timestamps based data versioning \cite{Huq2011}.
+
+The Ariadne system \cite{Glavic2013} provides a series of techniques to capture provenance of data streams, including operators that address various optimization issues, such as minimising latency and computational cost and decoupling provenance computation from stream processing.
+}
+
 
 \section{Provenance generation framework}
 
