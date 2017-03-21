@@ -1,0 +1,95 @@
+@article{Interlandi:2015:TDP:2850583.2850595,
+author = {Interlandi, Matteo and Shah, Kshitij and Tetali, Sai Deep and Gulzar, Muhammad Ali and Yoo, Seunghyun and Kim, Miryung and Millstein, Todd and Condie, Tyson},
+doi = {10.14778/2850583.2850595},
+issn = {2150-8097},
+journal = {Proc. VLDB Endow.},
+month = {nov},
+number = {3},
+pages = {216--227},
+publisher = {VLDB Endowment},
+title = {{Titian: Data Provenance Support in Spark}},
+volume = {9},
+year = {2015}
+}
+
+@article{Curcin2016,
+abstract = {Abstract Decision support systems are used as a method of promoting consistent guideline-based diagnosis supporting clinical reasoning at point of care. However, despite the availability of numerous commercial products, the wider acceptance of these systems has been hampered by concerns about diagnostic performance and a perceived lack of transparency in the process of generating clinical recommendations. This resonates with the Learning Health System paradigm that promotes data-driven medicine relying on routine data capture and transformation, which also stresses the need for trust in an evidence-based system. Data provenance is a way of automatically capturing the trace of a research task and its resulting data, thereby facilitating trust and the principles of reproducible research. While computational domains have started to embrace this technology through provenance-enabled execution middlewares, traditionally non-computational disciplines, such as medical research, that do not rely on a single software platform, are still struggling with its adoption. In order to address these issues, we introduce provenance templates – abstract provenance fragments representing meaningful domain actions. Templates can be used to generate a model-driven service interface for domain software tools to routinely capture the provenance of their data and tasks. This paper specifies the requirements for a Decision Support tool based on the Learning Health System, introduces the theoretical model for provenance templates and demonstrates the resulting architecture. Our methods were tested and validated on the provenance infrastructure for a Diagnostic Decision Support System that was developed as part of the {\{}EU{\}} {\{}FP7{\}} {\{}TRANSFoRm{\}} project.},
+author = {Curcin, Vasa and Fairweather, Elliot and Danger, Roxana and Corrigan, Derek},
+doi = {http://dx.doi.org/10.1016/j.jbi.2016.10.022},
+issn = {1532-0464},
+journal = {Journal of Biomedical Informatics},
+keywords = {{\#}provenance,D2.1 (Software Engineering) Requirements/specifica,Decision support systems,Model-driven architectures},
+mendeley-tags = {{\#}provenance},
+pages = {--},
+title = {{Templates as a method for implementing data provenance in decision support systems}},
+year = {2016}
+}
+
+@techreport{w3c-prov-dm,
+author = {Moreau, Luc and Missier, Paolo and Belhajjame, Khalid and B'Far, Reza and Cheney, James and Coppens, Sam and Cresswell, Stephen and Gil, Yolanda and Groth, Paul and Klyne, Graham and Lebo, Timothy and McCusker, Jim and Miles, Simon and Myers, James and Sahoo, Satya and Tilmes, Curt},
+editor = {Moreau, Luc and Missier, Paolo},
+institution = {World Wide Web Consortium},
+keywords = {{\#}PROV,{\#}PROV-DM,{\#}W3C,{\#}provenance},
+title = {{PROV-DM: The PROV Data Model}},
+url = {http://www.w3.org/TR/prov-dm/},
+year = {2012}
+}
+
+@article{Huq2011,
+abstract = {Fine-grained data provenance ensures reproducibility of results in decision making, process control and e-science applications. However, maintaining this provenance is challenging in stream data processing because of its massive storage consumption, especially with large overlapping sliding windows. In this paper, we propose an approach to infer fine-grained data provenance by using a temporal data model and coarse-grained data provenance of the processing. The approach has been evaluated on a real dataset and the result shows that our proposed inferring method provides provenance information as accurate as explicit fine-grained provenance at reduced storage consumption. {\textcopyright} 2011 Springer-Verlag Berlin Heidelberg.},
+author = {Huq, Mohammad Rezwanul and Wombacher, Andreas and Apers, Peter M G},
+doi = {10.1007/978-3-642-23091-2_11},
+isbn = {9783642230905},
+issn = {03029743},
+journal = {Lecture Notes in Computer Science},
+number = {PART 2},
+pages = {118--127},
+title = {{Inferring fine-grained data provenance in stream data processing: Reduced storage cost, high accuracy}},
+volume = {6861 LNCS},
+year = {2011}
+}
+@article{Vijayakumar2006,
+abstract = {Data streams flowing from the physical environment are as unpredictable as the environment itself. Radars go down, long haul networks drop packets, and readings are corrupted on the wire. Yet the data driven scientific models and data mining algorithms do not necessarily account for the inaccuracies when assimilating the data. Low overhead provenance collection partially solves this problem. We propose a data model and collection model for near real time provenance collection. We define a system architecture for stream provenance tracking and motivate with a real-world application in meteorology forecasting. {\textcopyright} Springer-Verlag Berlin Heidelberg 2006.},
+author = {Vijayakumar, Nithya N. and Plale, Beth},
+doi = {10.1007/11890850_6},
+file = {:Users/vasacurcin/Downloads/VijayakumarIPAW06.pdf:pdf},
+isbn = {354046302X},
+issn = {03029743},
+journal = {Lecture Notes in Computer Science},
+pages = {46--54},
+title = {{Towards low overhead provenance tracking in near real-time stream filtering}},
+volume = {4145 LNCS},
+year = {2006}
+}
+@article{Glavic2013,
+abstract = {Managing fine-grained provenance is a critical requirement for data stream management systems (DSMS), not only to address complex applications that require diagnostic capabilities and assurance, but also for providing advanced functionality such as revision processing or query debugging. This paper introduces a novel approach that uses operator instrumentation, i.e., modifying the behavior of operators, to generate and propagate fine-grained provenance through several operators of a query network. In addition to applying this technique to compute provenance eagerly during query execution, we also study how to decouple provenance computation from query processing to reduce run-time overhead and avoid unnecessary provenance retrieval. This includes computing a concise superset of the provenance to allow lazily replaying a query network and reconstruct its provenance as well as lazy retrieval to avoid unnecessary reconstruction of provenance. We develop stream-specific compression methods to reduce the computational and storage overhead of provenance generation and retrieval. Ariadne, our provenance-aware extension of the Borealis DSMS implements these techniques. Our experiments confirm that Ariadne manages provenance with minor overhead and clearly outperforms query rewrite, the current state-of-the-art. Copyright {\textcopyright} 2013 ACM.},
+author = {Glavic, B.a and Esmaili, K.S.b and Fischer, P.M.c and Tatbul, N.d},
+doi = {10.1145/2488222.2488256},
+file = {:Users/vasacurcin/Downloads/GE13.pdf:pdf},
+isbn = {9781450317580},
+journal = {Procs. DEBS 2013},
+keywords = {annotation,data streams,experiments,provenance},
+pages = {39--50},
+title = {{Ariadne: Managing fine-grained provenance on data streams}},
+year = {2013}
+}
+@inproceedings{Misra,
+address = {Berlin, Heidelberg},
+author = {Misra, Archan and Blount, Marion and Kementsietsidis, Anastasios and Sow, Daby and Wang, Min},
+booktitle = {Proceedings of IPAW 2008},
+doi = {10.1007/978-3-540-89965-5_26},
+pages = {253--265},
+publisher = {Springer Berlin Heidelberg},
+title = {{Advances and Challenges for Scalable Provenance in Stream Processing Systems}}
+}
+@inproceedings{Sansrimahachai2012,
+author = {Sansrimahachai, Watsawee and Weal, Mark J. and Moreau, Luc},
+booktitle = {2012 Sixth International Conference on Research Challenges in Information Science (RCIS)},
+doi = {10.1109/RCIS.2012.6240427},
+isbn = {978-1-4577-1938-7},
+month = {may},
+pages = {1--12},
+publisher = {IEEE},
+title = {{Stream ancestor function: A mechanism for fine-grained provenance in stream processing systems}},
+year = {2012}
+}
