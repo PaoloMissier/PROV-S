@@ -58,7 +58,7 @@
 %\titlebanner{banner above paper title}        % These are ignored unless
 %\preprintfooter{short description of paper}   % 'preprint' option specified.
 
-\title{Provenance for data streaming based on Templates}
+\title{Provenance for data streaming analytics based on Templates}
 
 \authorinfo{Paolo Missier}
            {School of Computing Science \\ Newcastle University, UK}
@@ -75,7 +75,7 @@ Metadata experts tend to agree, but they also point out that capturing the detai
 However, two elements combine to making the systematic recording of detailed provenance challenging in an analytics setting.
 Firsty, complex analytics pipelines tend to be opaque to the detailed observation of their internal workings, which is a condition for recording the provenance of its outcomes. Secondly, much of the interesting primary data for analytics increasingly comes in the form of streams, for instance from sensors and Internet of Things devices, 
 and yet provenance recorders are not generally designed to operate on streams.
-In this short paper we propose that both issues can be addressed in a principled way, using a combination of provenance templates and simple meta-processes that  instantiate the templates when are executed alongside the main analytics.
+In this short paper we propose that both issues can be addressed in a principled way, using a combination of provenance templates and simple meta-processes that  instantiate the templates when they are executed alongside the main analytics.
 Using these mechanisms, the provenance of the outputs from analytics that operate on streams is itself naturally represented as a stream of provenance assertions.
 \end{abstract}
 
@@ -127,24 +127,21 @@ As a natural application of the idea, when the data being processed is a stream,
 
 Our main contribution is the initial specification of a framework for expressing provenance of streaming data as it goes through black box analytics processes, and its illustration on a number of examples.
 %
-The framework is based on the concept of \textit{provenance templates}, as defined in \cite{Curcin2016} and deals with both stateless transformations, where outputs only depend on the input stream, and stateful ones, outputs also depend on internal state of the activity, and the process may change the state. 
+The framework is based on the concept of \textit{provenance templates}, as defined in \cite{Curcin2016} and deals with both stateless transformations, where outputs only depend on the input stream, and stateful ones, where outputs also depend on internal state of the activity, and the process may change the state. 
 
 \paragraph{Related work.}
 
 Perhaps the closest work is \cite{Moreau:TSE17}, where templates are formalised in much greater detail than we have done here. However, few details can be found in the paper  on how the bindings are actually generated, whereas we emphasise the \textit{sidecar process} idea for binding generation. Also, none of the example applications deal with stateful transformations of data streams.
 
-\note{Vasa: can you please add a few words on how each of these differs from our template stuff}
-
-
 \cite{Sansrimahachai2012} developed a provenance framework for streaming data using Stream Ancestor Function, a reverse mapping function used to express precise dependencies between input and output stream elements. They introduced an optimised coarse-grained provenance collection, reducing storage requirements, and provided a stream provenance query and replay execution algorithms.
-
+%
 Coarse-grained provenance collection techniques for low-overhead scientific stream processing have been considered in \cite{Vijayakumar2006}. A rule-based provenance model was designed for sensor streams, with each operation having a set of associated rules \cite{Misra}. An alternative approach was to augment coarse-grained provenance with timestamps based data versioning \cite{Huq2011}.
-
-The Ariadne system \cite{Glavic2013} provides a series of techniques to capture provenance of data streams, including operators that address various optimization issues, such as minimising latency and computational cost and decoupling provenance computation from stream processing.
+%
+Finally, the Ariadne system \cite{Glavic2013} provides a series of techniques to capture provenance of data streams, including operators that address various optimization issues, such as minimising latency and computational cost and decoupling provenance computation from stream processing.
 
 \section{Provenance generation framework}
 
-To introduce our framework, we start from the case of a batch, ``black box'' process P, for example a service or software component with an interface that defines $n$ inputs and $m$ outputs, but unknown internal behaviour.
+To introduce our framework, we start from the case of a batch, ``black box'' process P, for example a service or software component with an interface that defines $n$ inputs and $m$ outputs, but with unknown internal behaviour.
 We use function call notation to denote an invocation of $P$:
 \begin{equation}
 \langle y_1 \dots y_m \rangle = P(x_1, \dots x_n)
@@ -160,7 +157,7 @@ In fact, by default we cannot even claim derivation relationships of the form: \
 
 We propose a simple provenance generation framework that enables the provenance of the $y_j$ to be asserted, despite $P$ being a black box.
 We also show that the framework also captures the case where $P$ computes continuously when its inputs are data streams. 
-
+%
 The framework consists of the following elements.\\
 
 \noindent \textbf{1. A provenance template.} This is a PROV document $T$ where provenance variables may appear in lieu of constant elements, namely the identifiers for some of the Entities, Activities, and Agents, as well as some of their properties.
@@ -192,9 +189,9 @@ For example, given invocation (\ref{eq:P-inv})  and the variables defined in tem
 Here we have used the convenience token generator \texttt{gen(a,$i$)}, which simply generates a new constant from a seed, \texttt{a}, and a variable $i$, for instance \texttt{a\_i}.
 
 Note that in this binding, values $x_i, y_i$ in the same position $i$ are simultaneously assigned to variables \texttt{:x}, \texttt{:y}, along with a new constant formed from seed token \texttt{a}.
-Note also that what is actually assigned to a variable is the Id of a PROV Entity that represent the data, i.e., $x_i$ will be represented by an Entity and given some unique identifier. For simplicity of notation we leave this id-generation step implicit.
+Note also that what is actually assigned to a variable is the Id of a PROV Entity that represent the data, i.e., $x_i$ will be represented by an Entity and given some unique identifier. For simplicity of notation we leave this id-generation step implicit.\\
 
-\noindent \textbf{4. A function $\apply(B,T)$} that generates a PROV document by applying $B$ to $T$.
+\noindent \textbf{4. Function $\apply(B,T)$} that generates a PROV document by applying $B$ to $T$.
 Specifically:
 for provenance statement $s$ in $T$,  a \textit{ground} version of $s$ for  assignment $b$, denoted $s/b$, is obtained by lexically replacing each occurrence of variable 
 $\mathtt{:v}$ in $s$ by value $\mathtt{c}$ whenever $\mathtt{:v} \leftarrow \mathtt{c}$ is defined in $b$.
@@ -267,7 +264,7 @@ For this invocation, assuming for instance that $p$ evaluates to \texttt{True} o
 
  
  \subsection{Reduce}
-The \texttt{reduce} operator maps a list of elements to a different type of new data structure:
+The \texttt{reduce} operator maps a list of elements to a different type:
 \begin{equation}
 y = \mathbf{reduce}(\lambda~ a,b. f(a,b), [x_1 \dots x_n])
 \label{eq:reduce}
@@ -307,7 +304,7 @@ A straightforward template, following the pattern shown above, reflects the depe
  
 \subsection{Sidecar process specification and execution}
 
-So far we have introduced a framework that identifies the elements required to generate provenance from an arbitrary black box process $P$, and we have shown that it applies in particular to a common case of functional transformation.
+So far we have introduced a framework that identifies the elements required to generate provenance from an arbitrary black box process $P$, and we have shown that it applies in particular to common cases of functional transformation.
 
 To summarise, given $P$ with a known signature but otherwise unknown semantics, one should define: (i) a template $T$ and (ii) a binding generator process $P^B$.
 The latter is a \textit{sidecar} process, in the sense that it must be executed for every invocation of the main process $P$.
@@ -316,8 +313,8 @@ The latter is a \textit{sidecar} process, in the sense that it must be executed 
 The specifications of the template and sidecar process reflect the available knowledge of the input/output dependencies through $P$, even when $P$ itself maybe a black box.
 If nothing at all is known about these dependencies, then clearly no provenance will be available and the framework will not help much.
 On the other hand, the examples above show that, when $P$ has a well-defined semantics, it may be possible to capture enough of it in the template/sidecar pair, so that meaningful provenance can be generated. 
-
-\note{as seen in the examples, the sidecar process may end up encoding some elements of the process logic itself!}
+%
+%\note{as seen in the examples, the sidecar process may end up encoding some elements of the process logic itself!}
 
 Either way, we believe that this simple framework can be useful to separate out the specification of a possibly complex function, for example, an entire analytics pipeline, from the specification, hopefully simpler, of the input/output dependencies through the function.
 %
@@ -331,8 +328,8 @@ In those cases, a template specification that is less precise than the ones give
 A further concern is the implementation, deployment, and invocation of sidecar processes.
 While we envision an abstract API to let $P^B$ access the current inputs and outputs of $P$ as required (see \ref{eq:B}), i.e., \texttt{getInputs()}, \texttt{getOutputs()}, 
 the implementation of such API and the execution of $P^B$ must be supported by, and usually require ad hoc instrumentation of, $P$'s runtime environment. 
-The problem of implementing provenance capture sub-systems has been broadly investigated in the past, for instance: 
-(\cite{FRESCO}, \cite{noWorkflow}, \cite{Rlib}, \cite{Taverna provenance} \cite{VisTrails}, \cite{eSc provenance}, \cite{Kepler provenance}, \cite{SPADE}), and more recently for Spark \cite{Titian}.
+The problem of implementing provenance capture sub-systems has been broadly investigated in the past  
+\cite{murtanoworkflow,Silles2010,Missier2010a,DBLP:conf/ipaw/AltintasBJ06,gehani2011spade}, and more recently for Spark \cite{Interlandi:2015:TDP:2850583.2850595}.
 The issue of adapting some of these systems to support sidecar processes is beyond the scope of this short paper.
 
 \section{Application to stream data processing}  \label{sec:streaming}
@@ -340,7 +337,7 @@ The issue of adapting some of these systems to support sidecar processes is beyo
 So far we have  assumed that $P$ is a batch process.
 However, the framework is perhaps most useful when $P$'s inputs and outputs are data streams, as then it can be used to generate a continuous stream of provenance assertions, to parallel the data stream produced by $P$.
 %
-To make a concrete case, we use the Spark Streaming model as reference \cite{spark-streaming-oreillybook}. 
+To make a concrete case, we use the Spark Streaming model as reference \cite{Karau:2015:LSL:2717070}.
 Spark Streaming uses a \textit{micro-batch} architecture, whereby a streaming computation is achieved through a sequence of batch computations, each operating on a fragment of the stream defined by a configurable \textit{batch interval}. 
 Each micro-batch consists of a finite sequence of data structures (RDDs, Spark's main data abstraction), known as a DStream.
 
@@ -370,7 +367,7 @@ As $P$ keeps an internal state that determines the values in the output stream, 
 Furthermore, the state itself is updated at the end of each day, using the daily time series of stock values as well as the old state.
 
 We are going to model this scenario by recording the provenance of the state itself, i.e., by considering the state as a PROV Entity and including it in the framework.
-
+%
 To illustrate the idea, let us assume that during a-one day window, $n$ stock values $[x_1 \dots x_n]$ are processed, and $m$ alerts $[y_1 \dots y_m]$ are generated.
 We represent the sequence of states, that is, the daily averages, using a progression of Entity IDs: \texttt{s\_1}, \texttt{s\_2}, ... and the corresponding state-changing activities using 
 \texttt{avg\_1}, \texttt{avg\_2}, ..., which are all associated with the same \texttt{avg} plan.
@@ -439,7 +436,7 @@ For instance, the example in the previous section shows that it may be beneficia
 This would enable us, for example, to separate the issue of generating the outputs' provenance from the provenance of the process state.
 %
 
-Note finally, that while our framework produces continuous PROV documents by applying bindings to a template, one can also store the provenance \textit{intensionally} in a database as a stream of bindings along with one (or more) templates, and only generate fragments of the PROV document stream on demand.
+Note finally, that while our framework produces continuous PROV documents by applying bindings to a template, for efficiency of representation one can also store the provenance \textit{intensionally} in a database as a stream of bindings along with one (or more) templates, and only generate fragments of the PROV document stream on demand.
 
 
 
